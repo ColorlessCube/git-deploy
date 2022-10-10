@@ -1,0 +1,32 @@
+#!/bin/bash
+name=deploy
+case "$@" in
+  start)
+  source /usr/projects/deploy/venv/bin/activate
+  cd /usr/projects/deploy
+  gunicorn -c /usr/projects/deploy/gunicorn.config.py
+  deactivate
+  ;;
+  stop)
+  kill -9 `ps -ef | grep gunicorn | head -1 | grep $name |awk '{print $2}'`
+  ;;
+  status)
+  pids=$(ps aux | grep gunicorn | grep $name)
+  echo "$pids"
+  ;;
+  restart)
+  kill -9 `ps -ef | grep gunicorn | head -1 | grep $name |awk '{print $2}'`
+  sleep 1
+  source /usr/projects/deploy/venv/bin/activate
+  cd /usr/projects/deploy
+  gunicorn -c /usr/projects/deploy/gunicorn.config.py
+  deactivate
+  ;;
+  reload)
+  ps aux | grep gunicorn | grep $name | awk '{print $2}' | xargs kill -HUP
+  ;;
+  *)
+  echo 'Unknown arguments args(start|stop|status|restart|reload).'
+  exit 1
+  ;;
+esac
