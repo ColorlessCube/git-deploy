@@ -1,15 +1,11 @@
-import json
-
 from flask_login import current_user
 from flaskz.log import flaskz_logger
 from flaskz.models import model_to_dict
-from flaskz.rest import init_model_rest_blueprint, get_rest_log_msg, rest_permission_required
-from flask import request
+from flaskz.rest import get_rest_log_msg, rest_permission_required
 from flaskz.utils import create_response
 
 from ..api import api_bp
-from ..modules.git import Project, VM
-from ..utils import project_redeploy
+from ..modules.project import Project
 
 
 @api_bp.route('/project/', methods=['GET'])

@@ -6,7 +6,7 @@ from flask import request
 from flaskz.utils import create_response
 
 from ..api import api_bp
-from ..modules.git import Project, VM
+from ..modules.project import Project, VM
 from ..utils import project_redeploy
 
 init_model_rest_blueprint(Project, api_bp, '/project', routers=['add', 'update', 'upsert', 'delete'], module='project',

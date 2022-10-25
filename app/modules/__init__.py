@@ -8,4 +8,4 @@ class AutoModelMixin:
     auto_columns = ['id', 'created_user', 'created_at', 'updated_at']
 
 
-from .git import *
+from .project import *
