@@ -3,10 +3,10 @@ from datetime import datetime
 from flaskz.models import ModelBase, ModelMixin
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from . import AutoModelMixin
+from . import AutoModelMixin, UserBaseModelMixin
 
 
-class Project(ModelBase, ModelMixin, AutoModelMixin):
+class Project(ModelBase, UserBaseModelMixin, ModelMixin, AutoModelMixin):
     __tablename__ = 'project'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -25,7 +25,7 @@ class Project(ModelBase, ModelMixin, AutoModelMixin):
     updated_at = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
 
 
-class VM(ModelBase, ModelMixin, AutoModelMixin):
+class VM(ModelBase, UserBaseModelMixin, ModelMixin, AutoModelMixin):
     __tablename__ = 'vm'
 
     id = Column(Integer, primary_key=True, autoincrement=True)

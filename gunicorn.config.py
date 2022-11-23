@@ -2,7 +2,6 @@ import multiprocessing
 import os
 
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '_gunicorn'))  # 创建_gunicorn文件夹用于存放日志等文件
-_VAR = os.path.join(_ROOT, 'var')
 # _ETC = os.path.join(_ROOT, 'etc')
 
 # ------------------------------------log------------------------------------
@@ -14,15 +13,15 @@ loglevel = 'info'
 # :--access-logfile FILE    # os.path.join(_VAR, 'log/wsgi-access.log')
 # :None
 # :'-'   # log to stdout
-accesslog = os.path.join(_VAR, 'gunicorn_log', 'wsgi-access.log')
+accesslog = os.path.join(_ROOT, 'gunicorn-access.log')
 
 # errorlog = '-'   # The Error log file to write to.
 # :--error-logfile FILE, --log-file FILE    # os.path.join(_VAR, 'log/wsgi-error.log')
 # :'-'   # log to stderr.
-errorlog = os.path.join(_VAR, 'gunicorn_log', 'wsgi-error.log')
+errorlog = os.path.join(_ROOT, 'gunicorn-error.log')
 
 # pidfile = '' # The filename to use for the PID file. If not set, no PID file will be written.
-pidfile = os.path.join(_VAR, 'gunicorn_log', 'wsgi-pid.log')
+pidfile = os.path.join(_ROOT, 'gunicorn-pid.log')
 
 # capture_output = False     # Redirect stdout/stderr to specified file in errorlog.
 # :--capture-output

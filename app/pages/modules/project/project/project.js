@@ -38,10 +38,10 @@ var Project = z.util.mergeObject(pro.template.CRUDTablePage, {
                     render: function (td, data, column) {
                         pro.GridUtil.createOPButton(td, data, "enable", "<i class='text-danger fa fa-play' title='运行'></i>运行",
                             function () {
-
+                                Project.deployProject(data);
                             }, {
-                            className: 'btn btn-link color-success'
-                        })
+                                className: 'btn btn-link color-success'
+                            })
                         pro.template.CRUDTablePage.renderUpdateColumn(td, data, column);
                     }
                 }
@@ -117,5 +117,17 @@ var Project = z.util.mergeObject(pro.template.CRUDTablePage, {
     },
     addVMGridData: function (vmInfo) {
         this.vmGrid.addData(vmInfo);
+    },
+    deployProject: function (data) {
+        console.log(data.gets());
+        pro.AjaxCRUD.ajax({
+            url: AjaxUrl.project.deploy,
+            method: 'POST',
+            data: data.gets(),
+            success_notify: true,
+            complete: function (result) {
+                console.log(result);
+            }
+        });
     }
 });
