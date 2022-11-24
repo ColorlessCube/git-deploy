@@ -39,12 +39,10 @@ def deploy():
 
 @api_bp.route('/deploy/manual', methods=['POST'])
 def manual_deploy():
-    print(request)
     json_data = request.json
     req_log_data = json.dumps(json_data)
     token = json_data.get('token')
-    res_log_data = project_redeploy(json_data, token, True)
-    res_status = True
+    res_status, res_log_data = project_redeploy(json_data, token, True)
     flaskz_logger.info(get_rest_log_msg('Manual trigger.', req_log_data, res_status, res_log_data))
     return create_response(res_status, res_log_data)
 
@@ -72,14 +70,14 @@ def check_project_status(status_info, check_command):
     # 1. Empty result
     # lsof -i:8888
     if status_info == '':
-        result = False
+        return False
 
     # 2. Only ps result
     # ps -ef|grep srte
     # root     10905 10879  0 19:42 pts/0    00:00:00 grep --color=auto srte
     thread_info_ls = status_info.split('\n')
     if len(thread_info_ls) == 1 and 'grep' in thread_info_ls[0]:
-        result = False
+        return False
 
     # 3. Over given time offset
     # now 19:48 thread_start_time 19:42
@@ -97,14 +95,11 @@ def check_project_status(status_info, check_command):
             thread_start_time = int(thread_start_time.replace(':', ''))
             now = int(time.strftime('%H:%M', time.localtime()).replace(':', ''))
             if now - thread_start_time > 2:
-                result = False
+                return False
         for month_pattern in month_patterns:
             thread_start_time = re.findall(month_pattern, thread_info)
             if len(thread_start_time) >= 1:
-                result = False
-                break
-        if result is False:
-            break
+                return False
     return result
 
 
@@ -121,7 +116,7 @@ def project_redeploy(project_info, token, manual=False):
     :return:
     """
     if not project_info or not token:
-        return None
+        return False, None
     if not manual:
         project = Project.query_by({
             'name': project_info.get('name'),
@@ -129,7 +124,7 @@ def project_redeploy(project_info, token, manual=False):
         }, True)
         if project.repository != project_info.get('git_ssh_url') and project.repository != project_info.get(
                 'git_http_url'):
-            return None
+            return False, None
     else:
         project = Project.query_by({
             'name': project_info.get('name'),
@@ -173,4 +168,4 @@ def project_redeploy(project_info, token, manual=False):
                 flaskz_logger.error('Info: {} -- {} redeploy failed.\nError: {}'.format(project.name, vm.host, str(e)))
             finally:
                 VM.update(model_to_dict(vm))
-    return model_to_dict(project, {'cascade': 1})
+    return True, model_to_dict(project, {'cascade': 1})

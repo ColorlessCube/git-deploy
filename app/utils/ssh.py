@@ -20,6 +20,24 @@ def ssh_session(hostname, username, password=None, port=22, **kwargs):
 
 
 class SSHForGit(SSH):
+    def _recv_data(self):
+        """Receive the command output"""
+        while not self.channel.recv_ready():
+            time.sleep(0.01)
+        res_list = []
+        time.sleep(0.5)  # Solve the problem of incomplete data
+        # cmd_pattern = re.compile('.*[#$] ' + command) # Does not work with password entry
+        while True:
+            data = self.channel.recv(1024)
+            info = data.decode()
+            res = info.replace(' \r', '')
+            res_list.append(res)
+            if len(info) < 1024:  # read speed > write speed
+                if info.endswith(('# ', '$ ', ': ', '? ')):
+                    break
+
+        return ''.join(res_list)
+
     def git_pull(self, git_dir, repository, username=None, password=None, branch='main'):
         """
         :param git_dir:

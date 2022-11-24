@@ -4,6 +4,8 @@ alembic                 # 数据库表结构维护
 
 itsdangerous==2.0.1     # 最新版移除了TimedJSONWebSignatureSerializer, 要降级到2.0.1版本
 
+paramiko
+
 #pymysql                # mysql驱动
 #flask-cors             # 服务跨域
 #celery                 # 任务调度
