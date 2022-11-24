@@ -119,14 +119,13 @@ var Project = z.util.mergeObject(pro.template.CRUDTablePage, {
         this.vmGrid.addData(vmInfo);
     },
     deployProject: function (data) {
-        console.log(data.gets());
         pro.AjaxCRUD.ajax({
             url: AjaxUrl.project.deploy,
             method: 'POST',
             data: data.gets(),
             success_notify: true,
             complete: function (result) {
-                console.log(result);
+                data.set("vms", result.data.vms);
             }
         });
     }

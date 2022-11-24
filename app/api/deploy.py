@@ -127,7 +127,8 @@ def project_redeploy(project_info, token, manual=False):
             'name': project_info.get('name'),
             'branch': project_info.get('default_branch')
         }, True)
-        if project.repository != project_info.get('git_ssh_url') and project.repository != project_info.get('git_http_url'):
+        if project.repository != project_info.get('git_ssh_url') and project.repository != project_info.get(
+                'git_http_url'):
             return None
     else:
         project = Project.query_by({
@@ -172,4 +173,4 @@ def project_redeploy(project_info, token, manual=False):
                 flaskz_logger.error('Info: {} -- {} redeploy failed.\nError: {}'.format(project.name, vm.host, str(e)))
             finally:
                 VM.update(model_to_dict(vm))
-    return model_to_dict(project)
+    return model_to_dict(project, {'cascade': 1})
