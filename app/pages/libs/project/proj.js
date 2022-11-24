@@ -67,7 +67,8 @@ var AjaxUrl = {
         query: "/api/project/",
         add: "/api/project/",
         delete: "/api/project/[id]",
-        update: "/api/project/"
+        update: "/api/project/",
+        deploy: "/api/deploy/manual"
     },
     vm: {
         query: "/api/vm/",
@@ -76,7 +77,6 @@ var AjaxUrl = {
         delete: "/api/vm/[id]",
         update: "/api/vm/"
     },
-
     sys_role: {
         query: "/sys_mgmt/role/",
         add: "/sys_mgmt/role/",
