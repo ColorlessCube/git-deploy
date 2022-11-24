@@ -1,4 +1,4 @@
-flaskz
+flaskz~=0.9
 Flask-Login             # 用户登录管理
 alembic                 # 数据库表结构维护
 
@@ -9,10 +9,6 @@ itsdangerous==2.0.1     # 最新版移除了TimedJSONWebSignatureSerializer, 要
 #celery                 # 任务调度
 #redis                  # redis
 #websockets             # websocket
-flask
-werkzeug
-paramiko
-sqlalchemy
-click
+
 gunicorn
 gevent

@@ -124,6 +124,7 @@ var Project = z.util.mergeObject(pro.template.CRUDTablePage, {
             method: 'POST',
             data: data.gets(),
             success_notify: true,
+            tips: "项目手动部署",
             complete: function (result) {
                 data.set("vms", result.data.vms);
             }
