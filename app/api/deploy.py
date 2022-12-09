@@ -120,16 +120,17 @@ def project_redeploy(project_info, token, manual=False):
     if not manual:
         project = Project.query_by({
             'name': project_info.get('name'),
-            'branch': project_info.get('default_branch')
+            'repository': project_info.get('git_ssh_url')
         }, True)
-        if project.repository != project_info.get('git_ssh_url') and project.repository != project_info.get(
-                'git_http_url'):
-            return False, None
+        if not project:
+            project = Project.query_by({
+                'name': project_info.get('name'),
+                'repository': project_info.get('git_http_url')
+            }, True)
     else:
         project = Project.query_by({
             'name': project_info.get('name'),
-            'repository': project_info.get('repository'),
-            'branch': project_info.get('branch')
+            'repository': project_info.get('repository')
         }, True)
     if project and check_signature(project, token):
         flaskz_logger.info('Webhook: {}({}) start redeploy.'.format(project.name, project.branch))
