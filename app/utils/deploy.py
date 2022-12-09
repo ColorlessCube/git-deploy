@@ -122,3 +122,4 @@ def project_redeploy(project_info, token):
                 flaskz_logger.error('Info: {} -- {} redeploy failed.\nError: {}'.format(project.name, vm.host, str(e)))
             finally:
                 VM.update(model_to_dict(vm))
+        Project.update(model_to_dict(project))
