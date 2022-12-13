@@ -30,7 +30,7 @@ def deploy():
     req_log_data = json.dumps(json_data)
     token = request.headers.get('X-Gitlab-Token', '')
     if token:
-        project_redeploy(json_data.get('project'), token)
+        project_redeploy(json_data, token)
     res_log_data = 'Webhook Succeed.'
     res_status = True
     flaskz_logger.info(get_rest_log_msg('Webhook trigger.', req_log_data, res_status, res_log_data))
@@ -118,19 +118,24 @@ def project_redeploy(project_info, token, manual=False):
     if not project_info or not token:
         return False, None
     if not manual:
+        branch = project_info.get('ref').split('/')[-1]
+        project_info = project_info.get('project')
         project = Project.query_by({
             'name': project_info.get('name'),
-            'repository': project_info.get('git_ssh_url')
+            'repository': project_info.get('git_ssh_url'),
+            'branch': branch
         }, True)
         if not project:
             project = Project.query_by({
                 'name': project_info.get('name'),
-                'repository': project_info.get('git_http_url')
+                'repository': project_info.get('git_http_url'),
+                'branch': branch
             }, True)
     else:
         project = Project.query_by({
             'name': project_info.get('name'),
-            'repository': project_info.get('repository')
+            'repository': project_info.get('repository'),
+            'branch': project_info.get('branch')
         }, True)
     if project and check_signature(project, token):
         flaskz_logger.info('Webhook: {}({}) start redeploy.'.format(project.name, project.branch))
