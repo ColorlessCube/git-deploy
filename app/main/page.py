@@ -1,19 +1,36 @@
-# map the path to the static html files
+"""
+map the path to the static html files.
+it is recommended to use nginx as the static file server.
+"""
 from flask import redirect
+from flaskz.log import flaskz_logger
+from flaskz.rest import get_rest_log_msg
 
 from . import main_bp
 
 page_mapping = {
-    'error_404': './error/404.html',
+    # Admin
     'login': './login.html',
     'index': './index.html',
+    'error_404': './error/404.html',
 
-    'role': './modules/sys_mgmt/role/role.html',
-    'user': './modules/sys_mgmt/user/user.html',
-    'op_log': './modules/sys_mgmt/op_log/op_log.html',
+    # Example
+    'ex-simples': './modules/example/simples/simples.html',
+    'ex-departments': './modules/example/departments/departments.html',
+    'ex-employees': './modules/example/employees/employees.html',
 
-    'project': './modules/project/project/project.html',
-    'vm': './modules/project/vm/vm.html',
+    # Ext
+    'ext-nav': './modules/ext/nav/nav.html',
+    'ext-websocket': './modules/ext/websocket/websocket.html',
+
+    # System
+    'roles': './modules/sys_mgmt/roles/role.html',
+    'users': './modules/sys_mgmt/users/user.html',
+    'licenses': './modules/sys_mgmt/licenses/license.html',
+    'action-logs': './modules/sys_mgmt/action_logs/action_log.html',
+
+    # 'op-log': './modules/sys/op_log/op_log.html?module=lop-op',  # set module
+    'deploy': './modules/project/deploy/deploy.html',
 }
 
 
@@ -25,6 +42,7 @@ def favicon():
 @main_bp.route('/', defaults={'page': 'index'})
 @main_bp.route('/<page>', methods=['GET'])
 def show_page(page):
+    flaskz_logger.debug(get_rest_log_msg('Access page', page, True, None))
     _page = page_mapping.get(page)
     if _page:
         if page == 'index' or page == 'login':

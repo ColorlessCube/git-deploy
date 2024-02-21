@@ -29,9 +29,9 @@ var Login = {
                 if (result.data) {
                     var data = result.data;
                     var token;
-                    if (z.util.isString(data)) {
+                    if (z.type.isString(data)) {
                         token = data;
-                    } else if (z.util.isObject(data)) {
+                    } else if (z.type.isObject(data)) {
                         token = data.token;
                     }
                     if (token) {

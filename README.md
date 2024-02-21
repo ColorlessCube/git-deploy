@@ -1,64 +1,89 @@
-## 背景
+## 关于
 
-在开发项目时，涉及人员比较多，代码推送频繁。项目代码每次更新，需要在测试环境重部署项目，以便相关人员测试。有没有什么方法能让 push 代码后项目可以自动化部署呢？参考了 CI/CD 相关资料，发现 Git 的 Webhook 机制可以帮助实现这项任务。
-
-Git 提供的 Webhook 机制，简单来说就是一种反向 API 机制，类似于触发器的一样。对于 Git 而言，push、merge 等事件就是触发器，而项目的自动化重部署就是需要触发的动作。只需要将动作封装成 API 提供给 Git，那么在 Git 触发相应事件 时，就会通过 Webhook 来回调服务。
-
-## 安装
-
-项目目录下：
-
-```bash
-# 安装虚拟环境及依赖
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-deactivate
-# 启动项目
-chmod a+x deploy
-chmod a+x gunicorn.config.py
-bash deploy start
-```
-
-访问：http://127.0.0.1:3668/
+Flaskz-admin是基于 [Flaskz](https://pypi.org/project/flaskz/) 的管理系统开发模板，提供了基础的代码框架和文件目录， 可用于快速搭建系统开发框架和进行业务模块的开发
 
 ## 使用
 
-### 配置项目
+1. [☞数据库初始化&常用函数](http://zhangyiheng.com/blog/articles/py_flaskz_model_init.html)
+2. [☞数据模型扩展类](http://zhangyiheng.com/blog/articles/py_flaskz_model_mixin.html)
+3. [☞API封装、访问权限控制和系统日志](http://zhangyiheng.com/blog/articles/py_flaskz_api.html)
+4. [☞常用函数](http://zhangyiheng.com/blog/articles/py_flaskz_utils.html)
+5. [☞基于Flaskz的管理系统开发模板 Flaskz-admin (Hello World*)](http://zhangyiheng.com/blog/articles/py_flaskz_admin.html)
+6. [☞使用手册](http://zhangyiheng.com/blog/articles/py_flaskz_manual.html)
+7. [☞开发规范](http://zhangyiheng.com/blog/articles/dev_spec.html)
 
-- 名称：项目名称，需要与 gitlab 中仓库的名称保持一致；
-- 仓库：仓库的 url，免密拉取仓库设置 `SSH URL`，如`git@10.124.5.195:sp-dev/deploy.git`；账号密码拉取仓库设置 `HTTP URL`，如`http://10.124.5.195/sp-dev/deploy.git`；
-- 分支：触发 Webhook 的分支，在 Webhook 设置页面设置；
-- token：验证 Webhook 的 token，在 Webhook 设置页面设置；
-- username：拉取项目时的 gitlab 账户信息，已经设置免密拉取仓库时可为空；
-- password：拉取项目时的 gitlab 账户密码信息，已经设置免密拉取仓库时可为空。
+## 快速入门
 
-### 配置 server
+1. 修改系统配置参数[config.py](./config.py)
+    - `FLASKZ_DATABASE_URI` - 数据库地址(默认为`./_sqlite/flaskz-admin.db`)
+2. 修改alembic配置参数[alembic.ini](./alembic.ini)
+    - `sqlalchemy.url` - 数据库地址(默认为`./_sqlite/flaskz-admin.db`)
+3. 安装[requirements](requirements.txt)依赖 - `pip install -r requirements.txt`
+4. [cli](./cli.py)初始化数据库(`_sqlite/flaskz-admin.db`已经完成初始化)
+    1. 设置cli环境变量
+        - `export FLASK_APP=admin_app.py` # Mac/Linux
+        - `set FLASK_APP=admin_app.py`    # Windows
+    2. 初始化[数据库表](./migrations/versions/0.1_init_sys_mgmt.py) - `flask admin db upgrade`    # password:taozh
+    3. 初始化[数据库数据](./app/sys_mgmt/_init_db.py) -`flask admin db init`   # password:taozh
+5. 启动[应用](./deploy.py)
+    1. 设置Flask环境变量 - `export FLASK_APP=admin_app.py`
+    2. 启动Flask应用 - `flask run --host=0.0.0.0 --port=666`
+6. 访问
+    - 地址: [http://127.0.0.1:666](http://127.0.0.1:666)
+    - 账号/密码: admin/admin
 
-- 主机：server 的 IP 地址；
-- username：登录 server 的账户；
-- password：登录 server 的密码；
-- 本地仓库目录：该项目在本 server 中的 git 本地仓库目录；
-- 重部署命令：重新部署该项目的一系列 shell 命令，可能包含：文件的更新、项目的重启动；
-- 检查命令：检查项目是否重部署成功，需要 git deploy 对状态信息进行校验。
+## 文件&目录
+
+- _doc: 系统文档
+    - flaskz-admin.postman_collection.json: API Postman文件
+    - sys-mgmt.md: 系统权限设计&License功能介绍
+    - alembic.md: alembic常用命令
+- _sqlite: sqlite数据库文件目录(按需使用)
+- _syslog: 系统日志存放目录
+- **app**: 主应用目录
+    - _ext: 扩展功能目录(按需使用)
+        - nso: NSO功能扩展
+        - redis_ws: Redis+Websocket功能扩展
+    - **api**: API目录，存放应用所有api封装
+    - app_page: 前端页面静态文件目录(基于focus-ui)，也可通过nginx等代理软件实现文件服务功能(按需使用)
+    - **main**: 页面服务和应用异常处理目录
+        - errors.py: 应用异常处理
+        - page.py: 页面服务
+    - **modules**: 系统模块/数据模型类封装目录
+    - sys_init: 应用初始化目录
+        - status_codes.py: 系统状态码&国际化
+    - sys_mgmt: 默认提供的基于角色的权限控制功能目录(按需使用)
+        - license: license功能目录
+        - _init_db.py: 系统数据初始化(模块+角色+权限)
+        - auth.py: 系统校验(登录+权限检查)
+        - _private.py: 内部/私有功能(查看系统日志/查看系统路由)
+    - utils: 系统工具类目录
+    - **__init.py**: 应用创建和初始化
+- **migrations**: alembic数据库迁移目录，用于存放数据库迁移文件，按需使用
+    - versions: 数据库迁移版本目录
+- **alembic.ini**: alembic配置文件
+- test: 单元测试目录
+- **admin_app.py**: 应用程序主入口
+- cli.py: 命令行工具，可用于数据初始化等`flask admin db help`
+- **config.py**: 系统配置(for 开发)
+- config.ini: 系统配置文件(for 运维)，可省略，config.ini中属性的优先级>config.py中定义的属性
+- **requirements.txt**: 依赖lib列表`pip install -r requirements.txt`
+
+## 联系
+
+Email: taozh@cisco.com / taozh1982@gmail.com
 
 ## 版本
 
-### V 0.1.221010_beta
+- **1.6** `2023/06/16`
+    - [F] 修复`app._ext.redis_ws.init_websocket`函数中app_config设置问题 -`2023/07/10`
+    - [A] `alembic.inc`添加`ignore_tables`配置项，用于配置不需要alembic维护的table列表 -`2023/07/10`
+    - [A] 添加`example`示例 -`2023/07/11`
+    - [A] 添加`SysUserOption`表，用于存放用户选项(登录时间/登录次数/...) -`2023/07/20`
+    - [F] 修复`Action Logs`模块前端页面过滤问题 -`2023/08/23`
+    - [A] 添加`FLASKZ_DATABASE_SESSION_KWARGS = {'expire_on_commit': False}`配置 -`2023/09/01`
 
-更新
-
-- 完成 git deploy 的基本功能，需要继续测试；
-
-待办
-
-- 完成项目部署完成后的状态检查，需要适配各种状态信息的检验；
-
-### V 0.2.221025_beta
-
-更新
-
-- 增加项目部署完成后的状态检查，项目重部署后会运行检查项目状态命令，并对返回的状态信息进行检查，处理了以下几种情况：
-  1. 得到的状态信息为空白状态信息，状态信息为空字符串，认为重部署失败；
-  2. 得到的状态信息只有 `ps` 的状态信息，认为重部署失败，如 `root 10905 10879 0 19:42 pts/0 00:00:00 grep --color=auto srte`；
-  3. 得到的状态信息与当前时间的误差超过两分钟，则认为部署失败，如 `now 19:48 thread_start_time 19:42` 或者 `hread_start_time Oct15`
+- **1.5** `2023/05/01`
+    - [C] 重构系统RBAC [权限管理](http://zhangyiheng.com/blog/articles/py_flaskz_admin.html#toc-rbac) 模块(sys_mgmt)
+    - [C] 重构系统管理API(参考[开发规范](http://zhangyiheng.com/blog/articles/dev_spec.html))
+    - [A] 添加Basic Auth[用户认证](http://zhangyiheng.com/blog/articles/py_flaskz_admin.html#toc-login)  -`2023/05/09`

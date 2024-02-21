@@ -1,16 +1,10 @@
-flaskz~=0.9
-Flask-Login             # 用户登录管理
-alembic                 # 数据库表结构维护
+flaskz                  # deps: flask+sqlalchemy+requests
+Flask-Login             # for user login management
+alembic                 # for database migration
 
-itsdangerous==2.0.1     # 最新版移除了TimedJSONWebSignatureSerializer, 要降级到2.0.1版本
-
-paramiko
-
-#pymysql                # mysql驱动
-#flask-cors             # 服务跨域
-#celery                 # 任务调度
-#redis                  # redis
-#websockets             # websocket
-
-gunicorn
-gevent
+## Install following packages as needed
+# pycryptodome          # RSA&AES encryption，for license management
+# pymysql               # mysql driver
+# websockets            # websocket
+# redisz                # redisz
+# flask-cors            # for cross domain

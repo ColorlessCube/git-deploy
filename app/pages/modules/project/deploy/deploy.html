@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Project</title>
+    <link rel="stylesheet" href="../../../libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../libs/project/proj.css">
+
+    <script src="../../../libs/focus-ui/focus-ui.min.js"></script>
+    <script src="../../../libs/focus-ui/fu-pro.js"></script>
+    <script src="../../../libs/project/proj.js"></script>
+
+    <script src="./deploy.js"></script>
+</head>
+<body class="fu-pro">
+<div class="module">
+    <div class="toolbar controls">
+        <button id="addBtn" class="btn btn-primary">添加</button>
+    </div>
+    <div id="gridDiv" class="content"></div>
+    <div class="modal-form">
+        <div id="modalDiv" class="zw-modal drawer controls label-align-right" style="width: 900px">
+            <div class="content">
+                <div class="header">
+                    <span id="titleDiv" ze-model="modal_title" class="title"></span>
+                    <span class="close" data-dismiss="modal">×</span>
+                </div>
+                <div class="body">
+                    <input type="hidden" ze-model="id" ze-model-type="integer">
+                    <input type="hidden" ze-model="editType">
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="name">项目</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="name" autofocus>
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="repository">仓库</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="repository">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="branch">分支</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="branch">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="token">token</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="token">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12" for-ze-model="username">username</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="username" placeholder="git账户，虚拟机配置ssh认证可不填">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12" for-ze-model="password">password</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="password" placeholder="git密码，虚拟机配置ssh认证可不填">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-col-2-12" style="text-align: right;padding: 0;align-self:flex-start">
+                            <label class="grid-col-12-12 col-form-label required">vms</label>
+                            <br>
+                            <button id="addVMBtn" class="btn btn-link" title="添加Hop">
+                                <i class="fa fa-plus-square"></i>添加</button>
+                        </div>
+                        <div class="grid-col-10-12 modal-inner-grid" id="vmsGridDiv" style="align-self:flex-start"></div>
+                    </div>
+                </div>
+                <div class="footer">
+                    <button type="button" id="modalOkBtn" class="btn btn-primary" autofocus>OK</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="vmModalDiv" class="zw-modal drawer controls label-align-right bottom">
+            <div class="content">
+                <div class="header">
+                    <span id="vmTitleDiv" ze-model="vm_modal_title" class="title">虚拟机</span>
+                    <span class="close" data-dismiss="modal">×</span>
+                </div>
+                <div class="body">
+                    <input type="hidden" ze-model="id" ze-model-type="integer">
+                    <input type="hidden" ze-model="editType">
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="host">主机</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="host" autofocus>
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="username">username</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="username">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="password">password</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="password">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="git_dir">本地仓库目录</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="git_dir">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="deploy_command">重部署命令</label>
+                        <div class="grid-col-10-12">
+                            <textarea ze-model="deploy_command" placeholder="可以是多个shell命令，以换行隔开"></textarea>
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <label class="grid-col-2-12 required" for-ze-model="check_command">检查命令</label>
+                        <div class="grid-col-10-12">
+                            <input ze-model="check_command" placeholder="检查项目状态的命令，并根据结果判断项目状态">
+                        </div>
+                    </div>
+                </div>
+                <div class="footer">
+                    <button type="button" id="vmModalOkBtn" class="btn btn-primary">OK</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

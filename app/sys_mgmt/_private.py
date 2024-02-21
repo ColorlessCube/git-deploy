@@ -1,6 +1,6 @@
-from flask import request, make_response
+from flask import request, make_response, current_app
 from flaskz.log import flaskz_logger
-from flaskz.utils import clear_app_cache, get_app_config, get_app_path
+from flaskz.utils import clear_app_cache, get_app_path, get_app_config
 
 from . import sys_mgmt_bp
 
@@ -29,7 +29,7 @@ def _sys_sys_log():
     date = request.args.get('date', '').strip()
     file_path = get_app_config('FLASKZ_LOGGER_FILEPATH')
     file_name = get_app_config('FLASKZ_LOGGER_FILENAME')
-    flaskz_logger.debug('query app log:' + str(file_name))
+    flaskz_logger.debug('Query sys-log: ' + str(file_name) + '?date=' + date)
     if file_path and file_name:
         file_name = get_app_path(file_path, file_name)
 
@@ -42,5 +42,25 @@ def _sys_sys_log():
             res.headers['Content-Type'] = 'text/plain; charset=utf-8'
             return res
         except Exception as e:
-            return 'sys log not found'
-    return 'sys log not found'
+            return 'sys-log not found'
+    return 'sys-log not found'
+
+
+@sys_mgmt_bp.route('/_/url_map/', methods=['GET'])
+def _sys_url_map():
+    """
+    Get the url map of the current app
+
+    #methods#                      #rule#                                             #endpoint#
+    [OPTIONS,POST]                 /api/v1.0/template/                                api.model_rest_template_add
+    """
+    rules = list(current_app.url_map.iter_rules())
+    rules.sort(key=lambda item: item.rule)
+    routes = ['{:30s} {:50s} {}'.format('#methods#', '#rule#', '#endpoint#')]
+    for rule in rules:
+        methods = '[' + ','.join(sorted(rule.methods)) + ']'
+        line = '{:30s} {:50s} {}'.format(methods, rule.rule, rule.endpoint)
+        routes.append(line)
+    resp = current_app.make_response('\n'.join(routes))
+    resp.mimetype = "text/plain"
+    return resp

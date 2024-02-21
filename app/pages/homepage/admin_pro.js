@@ -1,33 +1,74 @@
 var FontIconMapping = {
-    100: "<i class='fa fa-server'></i>",
-    200: "<i class='fa fa-ioxhost'></i>",
-    300: "<i class='fa fa-cubes'></i>",
-    900: "<i class='fa fa-user'></i>",
+    10000: "<i class='fa fa-television'></i>",
+    20000: "<i class='fa fa-ioxhost'></i>",
+    30000: "<i class='fa fa-comments-o'></i>",
+    40000: "<i class='fa fa-plus-square'></i>",
+    50000: "<i class='fa fa-puzzle-piece'></i>",
+    90000: "<i class='fa fa-gears'></i>",
     default_root_folder: "<i class='fa fa-file-text-o'></i>",
     default_folder: "",
     default_leaf: ""
 };
 //url mapping
 var URLMapping = {
-    /*user: "./modules/sys_mgmt/user/user.html",
-    role: "./modules/sys_mgmt/role/role.html",
+    /*users: "./modules/sys_mgmt/users/user.html",
+    roles: "./modules/sys_mgmt/roles/role.html",
     op_log: "./modules/sys_mgmt/op_log/op_log.html"*/
 };
 z.util.mergeObject(Admin, {
     initCustom: function () {
-        this.initProfileController();
+        this.initPreferenceController();
     },
     initModel: function () {
         pro.AjaxCRUD.query({
             url: AjaxUrl.sys_auth.query,
-            tips: "Load account info",
+            tips: "加载账户信息",
             success_notify: false,
             success: function (result) {
                 this._initAccountMenus(result.data.menus);
                 this._initAccountProfile(result.data.profile);
+                this._initLicense(result.data.license);
             },
             context: this
         })
+    },
+    _initLicense: function (license) {
+        this._license = license;
+        if (!z.type.isObject(license)) {
+            z.dom.remove("#licenseA");
+        }
+        var cls = null;
+        var info = "";
+        if (license) {
+            var ExpireDays = license.ExpireDays;
+            if (license.Type === "EVALUATION") {
+                cls = "bg-color-warning";
+                info += "Evaluation version for " + license.User;
+            }
+            if (ExpireDays < 30) {
+                if (info) {
+                    info += "<br><i class='fa fa-warning'></i> "
+                }
+                info += "License expires in " + ExpireDays + " days";
+                if (ExpireDays < 10) {
+                    cls = "bg-color-danger"
+                } else {
+                    cls = "bg-color-warning"
+                }
+            }
+        } else if (license !== false) {
+            cls = "bg-color-danger"
+            // info = "系统未授权";
+            info = "No Authorized License";
+        }
+        if (info) {
+            z.dom.removeStyle("#licenseDiv", "display")
+            z.dom.removeClass("#licenseDiv", "bg-color-danger bg-color-warning")
+            z.dom.addClass("#licenseDiv", cls);
+            z.dom.setValue("#licenseDiv", info)
+        } else {
+            z.dom.setStyle("#licenseDiv", "display", "none");
+        }
     },
     _initAccountProfile: function (profile) {
         this._account_profile = profile;
@@ -35,12 +76,16 @@ z.util.mergeObject(Admin, {
     }
 });
 z.util.mergeObject(Admin, {
-    initProfileController: function () {
+    initPreferenceController: function () {
         this.profileForm = z.form.Form("#modalDiv");
         z.dom.event.onclick("#modalOkBtn", function () {
             var value = this.profileForm.getValue();
             if (value == null) {
                 return;
+            }
+            var password = value.password || "";
+            if (password.trim().length === 0) {
+                delete value.password;
             }
             pro.AjaxCRUD.update({
                 url: AjaxUrl.sys_auth.update,
@@ -51,13 +96,16 @@ z.util.mergeObject(Admin, {
                 },
                 context: this
             });
-        }, this)
+        }, this);
+        if (z.dom.query("#licenseA")) {
+            z.dom.event.onclick("#licenseA", this.showLicenseModal, this);
+        }
     },
     handleSignOut: function () {
         if (AjaxUrl.sys_auth.logout) {
             pro.AjaxCRUD.ajax({
                 url: AjaxUrl.sys_auth.logout,
-                tips: "退出登录",
+                tips: "Sign Out",
                 success_notify: false,
                 complete: function () {
                     window.location.href = "/login";
@@ -69,14 +117,42 @@ z.util.mergeObject(Admin, {
         z.bom.removeLocalStorage("auth-token");
         z.bom.clearSessionStorage();
     },
-    showProfileModal: function () {
+    showPreferenceModal: function () {
         z.widget.popover.close();
         this.profileForm.setValue(this._account_profile);
         z.widget.modal("#modalDiv");
+    },
+    showAboutModal: function () {
+        z.widget.popover.close();
+        z.widget.alert("<ul style='white-space: break-spaces'>" +
+            "<li>Used for quick initialization of the project</li>" +
+            "<li>Provides system and permission management modules(RBAC)</li>" +
+            "<li>Provides the front-end page</li>" +
+            "</ul>", "Flaskz Admin Template");
+    },
+    showLicenseModal: function () {
+        z.widget.popover.close();
+        var license = this._license;
+        if (!license) {
+            return;
+        }
+        var licenseItems = [];
+        ['User', "Type", "StartDate", "EndDate", "ExpireDays"].forEach(function (item) {
+            if (license.hasOwnProperty(item)) {
+                licenseItems.push(item + " :  " + license[item])
+            }
+        })
+        z.widget.alert(licenseItems.join("\n"), "License")
     }
 });
 z.util.mergeObject(Admin, {
     _initAccountMenus: function (menus) {
+        if (menus == null || menus.length === 0) {
+            z.dom.empty("body>.body-main");
+            z.dom.setValue("body>.body-main", "No Menus Available")
+            z.dom.addClass('body>.body-main', "color-danger")
+            return;
+        }
         var _this = this;
         var map = {};
         var rootMenus = [];
@@ -114,10 +190,10 @@ z.util.mergeObject(Admin, {
         menus.forEach(function (item) {
             var path = item.path;
             if (path != null) {
-                path_ops[path] = item.op_permissions;
+                path_ops[path] = item.actions;
             }
         });
-        z.bom.setSessionStorage("module_permissions", path_ops);
+        z.bom.setSessionStorage("menu_permissions", path_ops);
     },
     _getMenuIcon: function (item) {
         var icon = FontIconMapping[item.id];

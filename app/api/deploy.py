@@ -5,15 +5,15 @@ import re
 
 from flask import request
 from flaskz.log import flaskz_logger
-from flaskz.rest import init_model_rest_blueprint, get_rest_log_msg
+from flaskz.rest import register_model_route, get_rest_log_msg
 from flaskz.models import model_to_dict
 from flaskz.utils import create_response
 
 from ..api import api_bp
-from ..utils import ssh_session
-from ..modules import Project, VM
+from ..utils.ssh import ssh_session
+from ..modules.project import Project, VM
 
-init_model_rest_blueprint(VM, api_bp, '/vm', module='vm', multiple_option={
+register_model_route(api_bp, VM, '/vm', module='deploy', multi_models={
     'vms': VM,
     'projects': {
         'model_cls': Project,
@@ -118,10 +118,11 @@ def project_redeploy(project_info, token, manual=False):
     if not project_info or not token:
         return False, None
     if not manual:
-        branch = project_info.get('ref').split('/')[-1]
+        # branch = project_info.get('ref').split('/')[-1]
+        branch = project_info.get('ref').replace('refs/heads/', '')
         project_info = project_info.get('project')
         project = Project.query_by({
-            'name': project_info.get('name'),
+            # 'name': project_info.get('name'),
             'repository': project_info.get('git_ssh_url'),
             'branch': branch
         }, True)
@@ -150,7 +151,7 @@ def project_redeploy(project_info, token, manual=False):
                 'hostname': vm.host,
                 'username': vm.username,
                 'password': vm.password,
-                'timeout': 10
+                'timeout': 180
             }
             git_info = {
                 'git_dir': vm.git_dir,
@@ -167,7 +168,7 @@ def project_redeploy(project_info, token, manual=False):
                     ssh.run_command_list(redeploy_command_list)
                     flaskz_logger.info('Info: {} -- {} git pull success.'.format(project.name, vm.host))
                     vm.status = check_project_status(ssh.run_command(vm.check_command), vm.check_command)
-                    vm.last_trig = datetime.now()
+                    vm.trigger_at = datetime.now()
                     restart_res = 'success' if vm.status is True else 'failed'
                     flaskz_logger.info('Info: {} -- {} restart {}.'.format(project.name, vm.host, restart_res))
             except Exception as e:
